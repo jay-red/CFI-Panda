@@ -1,32 +1,96 @@
-cimport client
+from client cimport Game
 import random
 import sys
 
+cdef struct s_Cell:
+	int owner
+	int attacker
+	int isTaking
+	int x
+	int y
+	double occupyTime
+	double attackTime
+	double takeTime
+	double finishTime
+	int cellType
+	int isBase
+	int isBuilding
+	double buildTime
+	int valid
+ctypedef s_Cell Cell
+
 cdef class Panda():
-	cdef client.Game game
-	cdef client.Cell lastCell
+	cdef Game game
+	cdef Cell lastCell
 	cdef int sideLength
+	cdef list myCells
+	cdef list targetCells
+	cdef int targetNum
+	cdef Cell adjacent[ 4 ]
 
 	def __init__( self ):
-		self.game = client.Game()
+		self.game = Game()
 		self.sideLength = 30
-
-	cdef ValidCell( Panda self, int x, int y ):
-		return ( x >= 0 and x < self.sideLength ) and ( y >= 0 and y < self.sideLength )
 
 	cdef Start( Panda self, name ):
 		self.game.JoinGame( name )
 		self.game.Refresh()
 		while True:
+			self.Refresh()
 			self.GameLoop()
 
+	"""
+		Convenience functions
+	"""
+	cdef AdjacentCells( Panda self, Cell cell ):
+		self.adjacent[ 0 ] = self.game.GetCell( cell.x, cell.y - 1 )
+		self.adjacent[ 1 ] = self.game.GetCell( cell.x + 1, cell.y )
+		self.adjacent[ 2 ] = self.game.GetCell( cell.x, cell.y + 1 )
+		self.adjacent[ 3 ] = self.game.GetCell( cell.x - 1, cell.y )
+
+	cdef int OwnCell( Panda self, Cell cell ):
+		cdef int data = 0
+		if cell.owner == self.game.uid:
+			data = 1
+		return data
+
+	cdef int EdgeCell( Panda self, Cell cell ):
+		self.AdjacentCells( cell )
+		cdef int cellIndex = 0
+		cdef int data = 0
+		for cellIndex in range( 4 ):
+			if self.adjacent[ cellIndex ].valid and not self.OwnCell( self.adjacent[ cellIndex ] ):
+				self.targetCells.append( self.adjacent[ cellIndex ] )
+				self.targetNum += 1
+				data = 1
+		return data
+
+	"""
+		Game functions
+	"""
+	cdef Refresh( Panda self ):
+		self.myCells = []
+		self.targetCells = []
+		self.game.Refresh()
+		cdef int x
+		cdef int y
+		cdef Cell cell
+		for x in range( self.sideLength ):
+			for y in range( self.sideLength ):
+				cell = self.game.GetCell( x, y )
+				if self.OwnCell( cell ):
+					self.myCells.append( cell )
+					if self.EdgeCell( cell ):
+						pass
+
+	"""
 	cdef GameLoop( Panda self ):
 		cdef int x
 		cdef int y
 		cdef int targetX
 		cdef int targetY
-		cdef client.Cell c
-		cdef client.Cell cc
+		cdef Cell c
+		cdef Cell cc
 		for x in range( self.sideLength ):
 			for y in range( self.sideLength ):
 				c = self.game.GetCell( x, y )
@@ -34,12 +98,16 @@ cdef class Panda():
 					d = random.choice( [ ( 0, 1 ), ( 0, -1 ), ( 1, 0 ), ( -1, 0 ) ] )
 					targetX = x + d[ 0 ]
 					targetY = y + d[ 1 ]
-					if self.ValidCell( targetX, targetY ):
-						cc = self.game.GetCell( targetX, targetY )
-						if cc != None:
-							if cc.owner != self.game.uid and cc.takeTime <= 4.0 and not cc.takeTime == -1:
-								self.game.AttackCell( x + d[ 0 ], y + d[ 1 ], False )
-		self.game.Refresh()
+					cc = self.game.GetCell( targetX, targetY )
+					if cc.valid:
+						if cc.owner != self.game.uid and cc.takeTime <= 4.0 and not cc.takeTime == -1:
+							self.game.AttackCell( x + d[ 0 ], y + d[ 1 ], False )
+	"""
+
+	cdef GameLoop( Panda self ):
+		cdef cell
+		cell = random.choice( self.targetCells )
+		self.game.AttackCell( cell.x, cell.y )
 
 def Run( name ):
 	player = Panda()

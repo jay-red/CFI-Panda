@@ -41,27 +41,22 @@ cdef CheckToken( token ):
 		return loads( responseData )
 	return None
 
-cdef class Cell:
-	def __init__( self, cellData ):
-		self.owner = cellData[ "o" ]
-		self.attacker = cellData[ "a" ]
-		self.isTaking = cellData[ "c" ]
-		self.x = cellData[ "x" ]
-		self.y = cellData[ "y" ]
-		self.occupyTime = cellData[ "ot" ]
-		self.attackTime = cellData[ "at" ]
-		self.takeTime = cellData[ "t" ]
-		self.finishTime = cellData[ "f" ]
-		self.cellType = cellData[ "ct" ]
-		if cellData[ "b" ] == "base":
-			self.isBase = 1
-		else:
-			self.isBase = 0
-		if cellData[ "bf" ]:
-			self.isBuilding = 0
-		else:
-			self.isBuilding = 1
-		self.buildTime = cellData[ "bt" ]
+cdef struct s_Cell:
+	int owner
+	int attacker
+	int isTaking
+	int x
+	int y
+	double occupyTime
+	double attackTime
+	double takeTime
+	double finishTime
+	int cellType
+	int isBase
+	int isBuilding
+	double buildTime
+	int valid
+ctypedef s_Cell Cell
 
 cdef class User:
 	cdef int uid
@@ -142,7 +137,7 @@ cdef class Game:
 		else:
 			return -1
 
-	cdef int AttackCell( self, int x, int y, boost ):
+	cdef int AttackCell( self, int x, int y, boost = False ):
 		return self.Action( "attack", { "cellx" : x, "celly" : y, "boost" : boost, "token" : self.token } )
 
 	cdef int BuildBase( self, int x, int y ):
@@ -154,8 +149,38 @@ cdef class Game:
 	cdef int MultiAttack( self, int x, int y ):
 		return self.Action( "multiattack", { "cellx" : x, "celly" : y, "token" : self.token } )
 
-	cdef Cell GetCell( self, int x, int y ):
-		return Cell( self.data[ "cells" ][ x + ( 30 * y ) ] )
+	cdef GetCell( self, int x, int y ):
+		cellData = self.data[ "cells" ][ x + ( 30 * y ) ]
+		cdef Cell cell
+		if ( x >= 0 and x < 30 ) and ( y >= 0 and y < 30 ):
+			cell.owner = cellData[ "o" ]
+			cell.attacker = cellData[ "a" ]
+			cell.isTaking = cellData[ "c" ]
+			cell.x = cellData[ "x" ]
+			cell.y = cellData[ "y" ]
+			cell.occupyTime = cellData[ "ot" ]
+			cell.attackTime = cellData[ "at" ]
+			cell.takeTime = cellData[ "t" ]
+			cell.finishTime = cellData[ "f" ]
+			if cellData[ "ct" ] == "gold":
+				cell.cellType = 1
+			if cellData[ "ct" ] == "energy":
+				cell.cellType = 2
+			else:
+				cell.cellType = 0
+			if cellData[ "b" ] == "base":
+				cell.isBase = 1
+			else:
+				cell.isBase = 0
+			if cellData[ "bf" ]:
+				cell.isBuilding = 0
+			else:
+				cell.isBuilding = 1
+			cell.buildTime = cellData[ "bt" ]
+			cell.valid = 1
+		else:
+			cell.valid = 0
+		return cell
 
 	cdef double GetTakeTimeEq( self, double timeDiff ):
 		if timeDiff <= 0:
