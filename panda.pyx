@@ -1,23 +1,6 @@
-from client cimport Game
+from client cimport Game, Cell
 import random
 import sys
-
-cdef struct s_Cell:
-	int owner
-	int attacker
-	int isTaking
-	int x
-	int y
-	double occupyTime
-	double attackTime
-	double takeTime
-	double finishTime
-	int cellType
-	int isBase
-	int isBuilding
-	double buildTime
-	int valid
-ctypedef s_Cell Cell
 
 cdef class Panda():
 	cdef Game game
@@ -26,7 +9,10 @@ cdef class Panda():
 	cdef list myCells
 	cdef list targetCells
 	cdef int targetNum
-	cdef Cell adjacent[ 4 ]
+	cdef Cell cellUp
+	cdef Cell cellRight
+	cdef Cell cellDown
+	cdef Cell cellLeft
 
 	def __init__( self ):
 		self.game = Game()
@@ -42,11 +28,21 @@ cdef class Panda():
 	"""
 		Convenience functions
 	"""
+	cdef Cell GetAdjacentCell( Panda self, int cellIndex ):
+		if cellIndex == 0:
+			return self.cellUp
+		elif cellIndex == 1:
+			return self.cellRight
+		elif cellIndex == 2:
+			return self.cellDown
+		elif cellIndex == 3:
+			return self.cellLeft
+
 	cdef AdjacentCells( Panda self, Cell cell ):
-		self.adjacent[ 0 ] = self.game.GetCell( cell.x, cell.y - 1 )
-		self.adjacent[ 1 ] = self.game.GetCell( cell.x + 1, cell.y )
-		self.adjacent[ 2 ] = self.game.GetCell( cell.x, cell.y + 1 )
-		self.adjacent[ 3 ] = self.game.GetCell( cell.x - 1, cell.y )
+		self.cellUp = self.game.GetCell( cell.x, cell.y - 1 )
+		self.cellRight = self.game.GetCell( cell.x + 1, cell.y )
+		self.cellDown = self.game.GetCell( cell.x, cell.y + 1 )
+		self.cellLeft = self.game.GetCell( cell.x - 1, cell.y )
 
 	cdef int OwnCell( Panda self, Cell cell ):
 		cdef int data = 0
@@ -58,9 +54,11 @@ cdef class Panda():
 		self.AdjacentCells( cell )
 		cdef int cellIndex = 0
 		cdef int data = 0
+		cdef Cell adjacent
 		for cellIndex in range( 4 ):
-			if self.adjacent[ cellIndex ].valid and not self.OwnCell( self.adjacent[ cellIndex ] ):
-				self.targetCells.append( self.adjacent[ cellIndex ] )
+			adjacent = self.GetAdjacentCell( cellIndex )
+			if adjacent.valid and not self.OwnCell( adjacent ):
+				self.targetCells.append( adjacent )
 				self.targetNum += 1
 				data = 1
 		return data
@@ -105,7 +103,7 @@ cdef class Panda():
 	"""
 
 	cdef GameLoop( Panda self ):
-		cdef cell
+		cdef Cell cell
 		cell = random.choice( self.targetCells )
 		self.game.AttackCell( cell.x, cell.y )
 
