@@ -53,7 +53,12 @@ cdef class Cell:
 			self.attackTime = cellData[ "at" ]
 			self.takeTime = cellData[ "t" ]
 			self.finishTime = cellData[ "f" ]
-			self.cellType = cellData[ "ct" ]
+			if cellData[ "ct" ] == "gold":
+				self.cellType = 1
+			elif cellData[ "ct" ] == "energy":
+				self.cellType = 2
+			else:
+				self.cellType = 0
 			if cellData[ "b" ] == "base":
 				self.isBase = 1
 			else:

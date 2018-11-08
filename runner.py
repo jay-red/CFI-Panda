@@ -1,5 +1,5 @@
-from panda import Run
 import sys
+from pandamonium import Run
 
 name = "Pandamonium"
 if len( sys.argv ) == 2:

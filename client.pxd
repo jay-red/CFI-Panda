@@ -8,7 +8,7 @@ cdef class Cell:
 	cdef double attackTime
 	cdef double takeTime
 	cdef double finishTime
-	cdef cellType
+	cdef int cellType
 	cdef int isBase
 	cdef int isBuilding
 	cdef double buildTime 
