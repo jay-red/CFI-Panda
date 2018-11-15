@@ -2,3 +2,5 @@ token*
 *.c
 *.so
 *.html
+build/
+build/*

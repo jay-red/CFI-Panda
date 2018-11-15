@@ -19,14 +19,13 @@ cdef class Pandamonium( Panda ):
 				if self.FastCell( target ):
 					data = self.game.AttackCell( target.x, target.y )
 					if data:
-						erturn
+						return
 		if self.adjacentEnergyNum > 0:
 			for target in self.adjacentEnergyCells:
 				if self.FastCell( target ):
 					data = self.game.AttackCell( target.x, target.y )
 					if data:
 						return
-		"""
 		if self.adjacentEnemyNum > 0 and random.randrange( 2 ) == 0:
 			self.targetCell = random.choice( self.adjacentEnemyCells )
 			if self.FastCell( self.targetCell ):
@@ -35,7 +34,6 @@ cdef class Pandamonium( Panda ):
 			self.targetCell = random.choice( self.adjacentNormalCells )
 			if self.FastCell( self.targetCell ):
 				self.AttackTarget()
-		"""
 
 def Run( name ):
 	player = Pandamonium()
