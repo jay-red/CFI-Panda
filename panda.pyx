@@ -85,20 +85,26 @@ cdef class Panda():
 					else:
 						self.playerCells.append( cell )
 					for cellIndex in range( 4 ):
+						self.FetchAdjacentCells( cell )
 						adjacent = self.GetAdjacentCell( cellIndex )
 						if adjacent.valid and not self.OwnCell( adjacent ):
 							if adjacent.cellType == 1:
-								adjacentGoldNum += 1
-								adjacentGoldCells.append( adjacent )
+								self.adjacentGoldNum += 1
+								self.adjacentGoldCells.append( adjacent )
 							elif adjacent.cellType == 2:
-								adjacentEnergyNum += 1
-								adjacentEnergyCells.append( adjacent )
+								self.adjacentEnergyNum += 1
+								self.adjacentEnergyCells.append( adjacent )
 							elif self.EnemyCell( adjacent ):
-								adjacentEnemyNum += 1
-								adjacentEnemyCells.append( adjacent )
+								self.adjacentEnemyNum += 1
+								self.adjacentEnemyCells.append( adjacent )
 							else:
-								adjacentNormalNum += 1
-								adjacentNormalCells.append( adjacent )
+								self.adjacentNormalNum += 1
+								self.adjacentNormalCells.append( adjacent )
+		print( "Gold: " + str( self.adjacentGoldNum ) )
+		print( "Energy: " + str( self.adjacentEnergyNum ) )
+		print( "Enemy: " + str( self.adjacentEnemyNum ) )
+		print( "Normal: " + str( self.adjacentNormalNum ) )
+		print( "" )
 
 	cdef int AttackTarget( Panda self, boost = False ):
 		return self.game.AttackCell( self.targetCell.x, self.targetCell.y, boost = boost )

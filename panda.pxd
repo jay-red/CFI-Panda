@@ -24,6 +24,7 @@ cdef class Panda():
 	cdef Cell GetAdjacentCell( Panda self, int cellIndex )
 	cdef FetchAdjacentCells( Panda self, Cell cell )
 	cdef int OwnCell( Panda self, Cell cell )
+	cdef int EnemyCell( Panda self, Cell cell )
 	cdef int AttackCooldown( Panda self )
 	cdef int FastCell( Panda self, Cell cell )
 	cdef int AttackTarget( Panda self, boost = * )
