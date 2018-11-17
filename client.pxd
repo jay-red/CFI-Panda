@@ -1,3 +1,15 @@
+cdef class User:
+	cdef int uid
+	cdef name
+	cdef double cdTime
+	cdef double buildCdTime
+	cdef int cellNum
+	cdef int baseNum
+	cdef int goldCellNum
+	cdef int energyCellNum
+	cdef double energy
+	cdef double gold
+
 cdef class Cell:
 	cdef int owner
 	cdef int attacker
@@ -39,4 +51,5 @@ cdef class Game:
 	cdef int Blast( self, int x, int y, direction )
 	cdef int MultiAttack( self, int x, int y )
 	cdef Cell GetCell( self, int x, int y )
+	cdef RefreshUsers( self )
 	cdef int Refresh( self )

@@ -52,6 +52,8 @@ cdef class Panda():
 		cdef int data = 0
 		if cell.takeTime <= self.attackThreshold and not cell.takeTime == -1:
 			data = 1
+		if not data:
+			print( cell.takeTime )
 		return data
 
 	"""
@@ -84,8 +86,8 @@ cdef class Panda():
 						self.playerBases.append( cell )
 					else:
 						self.playerCells.append( cell )
+					self.FetchAdjacentCells( cell )
 					for cellIndex in range( 4 ):
-						self.FetchAdjacentCells( cell )
 						adjacent = self.GetAdjacentCell( cellIndex )
 						if adjacent.valid and not self.OwnCell( adjacent ):
 							if adjacent.cellType == 1:
@@ -100,11 +102,6 @@ cdef class Panda():
 							else:
 								self.adjacentNormalNum += 1
 								self.adjacentNormalCells.append( adjacent )
-		print( "Gold: " + str( self.adjacentGoldNum ) )
-		print( "Energy: " + str( self.adjacentEnergyNum ) )
-		print( "Enemy: " + str( self.adjacentEnemyNum ) )
-		print( "Normal: " + str( self.adjacentNormalNum ) )
-		print( "" )
 
 	cdef int AttackTarget( Panda self, boost = False ):
 		return self.game.AttackCell( self.targetCell.x, self.targetCell.y, boost = boost )

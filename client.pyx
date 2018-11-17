@@ -73,16 +73,6 @@ cdef class Cell:
 			self.valid = 0
 
 cdef class User:
-	cdef int uid
-	cdef name
-	cdef double cdTime
-	cdef double buildCdTime
-	cdef int cellNum
-	cdef int baseNum
-	cdef int goldCellNum
-	cdef int energyCellNum
-	cdef double energy
-	cdef double gold
 
 	def __init__( self, userData ):
 		self.uid = userData[ "id" ]
@@ -174,23 +164,42 @@ cdef class Game:
 			return 33.0
 		return 30.0 * ( 2 ** ( -timeDiff / 30.0 ) ) + 3
 
+	cdef RefreshUsers( self ):
+		cdef User user
+		for userData in self.data[ "users" ]:
+			user = User( userData )
+			if user.uid == self.uid:
+				self.gold = user.gold
+				self.energy = user.energy
+				self.cdTime = user.cdTime
+				self.buildCdTime = user.buildCdTime
+				self.cellNum = user.cellNum
+				self.baseNum = user.baseNum
+				self.goldCellNum = user.goldCellNum
+				self.energyCellNum = user.energyCellNum
+
 	cdef int Refresh( self ):
 		cdef int statusCode
 		if self.data == None:
 			statusCode, responseData = Post( "getgameinfo", { "protocol" : 2 } )
 			if statusCode == 200:
 				self.data = loads( responseData )
+				self.RefreshUsers()
+				print( "1" )
 				self.endTime = self.data[ "info" ][ "end_time" ]
+				print( "2" )
 				self.joinEndTime = self.data[ "info" ][ "join_end_time" ]
+				print( "3" )
 				self.currTime = self.data[ "info" ][ "time" ]
+				print( "4" )
 				self.lastUpdate = self.currTime
-			else:
-				return 0
 		else:
 			statusCode, responseData = Post( "getgameinfo", { "protocol" : 1, "timeAfter" : self.lastUpdate } )
 			if statusCode == 200:
 				responseData = loads( responseData )
 				self.data[ "info" ] = responseData[ "info" ]
+				self.data[ "users" ] = responseData[ "users" ]
+				self.RefreshUsers()
 				self.endTime = self.data[ "info" ][ "end_time" ]
 				self.joinEndTime = self.data[ "info" ][ "join_end_time" ]
 				self.currTime = self.data[ "info" ][ "time" ]
@@ -203,6 +212,4 @@ cdef class Game:
 					else:
 						cell[ "t" ] = self.GetTakeTimeEq( self.currTime - cell[ "ot" ] )
 					self.data[ "cells" ][ cell[ "x" ] + cell[ "y" ] * 30 ] = cell
-			else:
-				return 0
 		return 1
