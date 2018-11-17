@@ -15,8 +15,6 @@ cdef class Pandamonium( Panda ):
 		data = 0
 		if self.game.energy >= 95.0:
 			boost = True
-		print( self.game.baseNum )
-		print( self.game.gold )
 		if self.game.gold >= 60.0 and self.game.baseNum < 3:
 			newBase = random.choice( self.playerCells )
 			if self.FastCell( newBase ):

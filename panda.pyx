@@ -52,8 +52,6 @@ cdef class Panda():
 		cdef int data = 0
 		if cell.takeTime <= self.attackThreshold and not cell.takeTime == -1:
 			data = 1
-		if not data:
-			print( cell.takeTime )
 		return data
 
 	"""

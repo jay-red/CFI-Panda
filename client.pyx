@@ -185,13 +185,9 @@ cdef class Game:
 			if statusCode == 200:
 				self.data = loads( responseData )
 				self.RefreshUsers()
-				print( "1" )
 				self.endTime = self.data[ "info" ][ "end_time" ]
-				print( "2" )
 				self.joinEndTime = self.data[ "info" ][ "join_end_time" ]
-				print( "3" )
 				self.currTime = self.data[ "info" ][ "time" ]
-				print( "4" )
 				self.lastUpdate = self.currTime
 		else:
 			statusCode, responseData = Post( "getgameinfo", { "protocol" : 1, "timeAfter" : self.lastUpdate } )
